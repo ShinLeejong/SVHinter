@@ -1,4 +1,5 @@
 use ggez::{Context, GameResult, event, GameError};
+use crate::scenes::splash_scene::splash_scene::SplashScene;
 use crate::scenes::intro_scene::intro_scene::IntroScene;
 use crate::scenes::game_scene::game_scene::GameScene;
 
@@ -8,8 +9,8 @@ pub struct SceneManager {
 
 impl SceneManager {
     pub fn new(ctx: &mut ggez::Context) -> GameResult<SceneManager> {
-        let intro_scene = IntroScene::new(ctx)?;
-        Ok(SceneManager { current_scene: Box::new(intro_scene) })
+        let splash_scene = SplashScene::new(ctx)?;
+        Ok(SceneManager { current_scene: Box::new(splash_scene) })
     }
 
     pub fn switch_to_intro_scene(&mut self, ctx: &mut Context) -> GameResult<()> {
@@ -27,13 +28,17 @@ impl SceneManager {
 
 impl event::EventHandler<GameError> for SceneManager {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.current_scene.update(ctx);
-        Ok(())
+        match self.current_scene.update(ctx) {
+            Ok(()) => Ok(()),
+            Err(err) => Err(err)
+        }
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.current_scene.draw(ctx);
-        Ok(())
+        match self.current_scene.draw(ctx) {
+            Ok(()) => Ok(()),
+            Err(err) => Err(err)
+        }
     }
 
     fn mouse_button_down_event(
@@ -43,7 +48,10 @@ impl event::EventHandler<GameError> for SceneManager {
             _x: f32,
             _y: f32,
         ) {
-        self.switch_to_game_scene(_ctx);
+        match self.switch_to_game_scene(_ctx) {
+            Ok(()) => (),
+            Err(_) => panic!("error on mouse button down event")
+        }
     }
 
     fn mouse_button_up_event(
@@ -53,6 +61,9 @@ impl event::EventHandler<GameError> for SceneManager {
             _x: f32,
             _y: f32,
         ) {
-        self.switch_to_intro_scene(_ctx);
+        match self.switch_to_intro_scene(_ctx) {
+            Ok(()) => (),
+            Err(_) => panic!("error on mouse button down event")
+        }
     }
 }
